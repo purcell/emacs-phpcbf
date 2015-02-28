@@ -9,47 +9,45 @@ You can install `phpcbf.el` from [MELPA](http://melpa.org) with package.el
 
 And you can also install it with [el-get](https://github.com/dimitri/el-get).
 
-## Commands
-`phpcbf.el` provides following commands.
+## Features
 
 #### `phpcbf`
-If called interactively, the current buffer is formatted according to `phpcbf:standard`.
+If called interactively, the current buffer is formatted according to `phpcbf-standard`.
 Default standard is "PEAR".
 
-#### `phpcbf:before-save`
+#### `phpcbf-enable-on-save`
 Add this to init file to run phpcbf on the current buffer when saving:
+
 ```elisp
-(add-hook 'before-save-hook 'phpcbf:before-save)
+(add-hook 'php-mode-hook 'phpcbf-enable-on-save)
 ```
-Note that this will cause php-mode to get loaded the first time
-you save any file, kind of defeating the point of autoloading.
 
 ## Sample Configuration
 ```elisp
 (require 'phpcbf)
 
 (custom-set-variables
- '(phpcbf:executable "/usr/local/bin/phpcbf")
- '(phpcbf:standard "PSR2")
- '(phpcbf:encoding "utf-8"))
+ '(phpcbf-executable "/usr/local/bin/phpcbf")
+ '(phpcbf-standard "PSR2"))
 
-;; Format code before saving.
-(add-hook 'before-save-hook 'phpcbf:before-save)
+;; Auto format on save.
+(add-hook 'php-mode-hook 'phpcbf-enable-on-save)
 ```
 
 ## Customize
-### `phpcbf:executable`
-Location of `phpcbf` command.
+### `phpcbf-executable`
+Location of `phpcbf` command (default is called `(executable-find "phpcbf")`).
 
-### `phpcbf:standard`
-The name or path of the coding standard to use (default is PEAR).
-Available standards: Generic, MySource, PEAR, PHPCS, PSR1, PSR2, Squiz, Zend.
+### `phpcbf-standard`
+The name or path of the coding standard to use (default is "PEAR").
+
+How to check installed standards:
+```bash
+$ phpcbf -i
+The installed coding standards are PSR1, PHPCS, Zend, PEAR, PSR2, Squiz and MySource
+```
 
 And more your custom standards. [See here](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Coding-Standard-Tutorial)
-
-### `phpcbf:encoding`
-The encoding of the files being fixed (default is iso-8859-1).
-iso-8859-1 is PHP_CodeSniffer's default.
 
 ## See Also
 ### [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)

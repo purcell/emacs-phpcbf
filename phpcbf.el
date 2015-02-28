@@ -4,7 +4,8 @@
 
 ;; Author: nishimaki10
 ;; URL: https://github.com/nishimaki10/emacs-phpcbf
-;; Version: 0.9
+;; Version: 0.9.1
+;; Package-Requires: ((s "1.9.0"))
 ;; Keywords: tools, php
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -28,26 +29,19 @@
 
 ;;; Code:
 
+(require 's)
+
 (defgroup phpcbf nil
-  "Format code using phpcbf"
-  :prefix "phpcbf:"
+  "Format PHP code using PHP_CodeSniffer's phpcbf"
   :group 'tools)
 
-(defcustom phpcbf:executable (executable-find "phpcbf")
+(defcustom phpcbf-executable (executable-find "phpcbf")
   "Location of the phpcbf executable."
   :group 'phpcbf
   :type 'string)
 
-(defcustom phpcbf:standard "PEAR"
-  "The name or path of the coding standard to use.
-Available standards: Generic, MySource, PEAR, PHPCS, PSR1, PSR2, Squiz, Zend.
-And more your custom standards."
-  :group 'phpcbf
-  :type 'string)
-
-(defcustom phpcbf:encoding "iso-8859-1"
-  "The encoding of the files being fixed (default is iso-8859-1).
-iso-8859-1 is PEAR standards."
+(defcustom phpcbf-standard "PEAR"
+  "The name or path of the coding standard to use."
   :group 'phpcbf
   :type 'string)
 
@@ -60,14 +54,20 @@ iso-8859-1 is PEAR standards."
     (unwind-protect
         (let ((status)
               (stderr)
+              (standard (format "--standard=%s" phpcbf-standard))
+              (encoding (s-chop-suffixes
+                         '("-unix" "-dos" "-mac")
+                         (format "--encoding=%s" buffer-file-coding-system)))
               (keep-stderr (list t temp-file)))
 
           (setq status
                 (call-process-region
-                 (point-min) (point-max) phpcbf:executable
+                 (point-min) (point-max) phpcbf-executable
                  t keep-stderr t
-                 (concat "--standard=" phpcbf:standard)
-                 (concat "--encoding=" phpcbf:encoding)))
+                 "-d" "error_reporting=0"
+                 standard
+                 encoding
+                 ))
 
           (setq stderr
                 (with-temp-buffer
@@ -82,19 +82,15 @@ iso-8859-1 is PEAR standards."
             (error "`phpcbf` killed by signal %s%s" status stderr))
            ((not (equal 1 status))
             (error "`phpcbf` failed with code %d%s" status stderr))
-           (t (message "phpcbf format succeed.")))
+           (t (message (format "Formatted to standard '%s'" phpcbf-standard))))
           ))
     (delete-file temp-file)
     (goto-char now-point)))
 
 ;;;###autoload
-(defun phpcbf:before-save ()
-  "Add this to .emacs to run phpcbf on the current buffer when saving:
-\(add-hook 'before-save-hook 'phpcbf:before-save\).
-Note that this will cause php-mode to get loaded the first time
-you save any file, kind of defeating the point of autoloading."
-  (interactive)
-  (when (eq major-mode 'php-mode) (phpcbf)))
+(defun phpcbf-enable-on-save()
+  "Run pbpcbf when this buffer is saved."
+  (add-hook 'before-save-hook 'phpcbf nil t))
 
 (provide 'phpcbf)
 
