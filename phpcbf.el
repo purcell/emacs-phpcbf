@@ -5,7 +5,7 @@
 ;; Author: nishimaki10
 ;; URL: https://github.com/nishimaki10/emacs-phpcbf
 ;; Version: 0.9
-;; Keywords: tooks, php
+;; Keywords: tools, php
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
